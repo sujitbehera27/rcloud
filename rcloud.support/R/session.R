@@ -4,15 +4,6 @@
 ################################################################################
 ## evaluation of R code
 
-canonicalize.command <- function(command, language) {
-  if (language == "R") {
-    command <- paste("```{r}", command, "```\n", sep='\n')
-  } else if (language == "Markdown") {
-    command
-  } else
-    stop(paste("Don't know language '",  language, "' - only Markdown or R supported."))
-}
-
 rcloud.get.gist.part <- function(partname) {
   .session$current.notebook$content$files[[partname]]$content
 }
@@ -27,18 +18,18 @@ rcloud.unauthenticated.session.cell.eval <- function(partname, language, silent)
 
 rcloud.session.cell.eval <- function(partname, language, silent) {
   command <- rcloud.get.gist.part(partname)
-  if (language == "R" || language == "Markdown") {
+  if (!is.null(.session$languages[language]))
+    .session$languages[[language]]$run.cell(command, silent, .session)
+  else if (language == "Markdown") {
     session.markdown.eval(command, language, silent)
-  } else if (language == "Python") {
-    session.python.eval(command)
   }
 }
 
 rcloud.authenticated.cell.eval <- function(command, language, silent) {
-  if (language == "R" || language == "Markdown") {
+  if (!is.null(.session$languages[language]))
+    .session$languages[[language]]$run.cell(command, silent, .session)
+  else if (language == "Markdown") {
     session.markdown.eval(command, language, silent)
-  } else if (language == "Python") {
-    session.python.eval(command)
   }
 }
 
@@ -46,27 +37,7 @@ rcloud.set.device.pixel.ratio <- function(ratio) {
   .session$device.pixel.ratio <- ratio
 }
 
-session.python.eval <- function(command) {
-  if (is.null(.session$python.runner))
-    rcloud.start.python()
-  result <- rcloud.exec.python(command)
-  to.chunk <- function(chunk) {
-    chunk <- as.list(chunk)
-    if (chunk$output_type == "pyout") {
-      paste("\n    ", chunk$text, sep='')
-    } else if (chunk$output_type == "stream") {
-      paste("\n    ", chunk$text, sep='')
-    } else if (chunk$output_type == "display_data") {
-      paste("<img src=\"data:image/png;base64,", sub("\\s+$", "", chunk$png), "\">\n", sep='')
-    } else ""
-  }
-  md <- paste("```py",command,"```\n",paste(lapply(result, to.chunk), collapse='\n'), sep='\n')
-  val <- if (nzchar(md)) markdownToHTML(text=md, fragment=TRUE) else ""
-  val
-}
-
 session.markdown.eval <- function(command, language, silent) {
-  command <- canonicalize.command(command, language)
   if (!is.null(.session$device.pixel.ratio))
     opts_chunk$set(dpi=72*.session$device.pixel.ratio)
   if (!is.null(.session$disable.warnings))
