@@ -88,18 +88,10 @@ function create_markdown_cell_html_view(language) { return function(cell_model) 
     cell_status.append(button_float);
     cell_status.append($("<div style='clear:both;'></div>"));
     var col = $('<table/>').append('<tr/>');
-    var languages = {
-        "R": { 'background-color': "#E8F1FA",
-               'ace_mode': "ace/mode/r" },
-        "Markdown": { 'background-color': "#F7EEE4",
-                      'ace_mode': "ace/mode/rmarkdown" },
-        "Python": { 'background-color': "#E8F1FA",
-                    'ace_mode': "ace/mode/python" }
-        // ,
-        // "Bash": { 'background-color': "#00ff00" }
-    };
+    var languages = {};
     var select = $("<select class='form-control'></select>");
-    _.each(languages, function(value, key) {
+    _.each(RCloud.language.available_languages(), function(key) {
+        languages[key] = {};
         languages[key].element = $("<option></option>").text(key);
         select.append(languages[key].element);
     });
@@ -133,13 +125,14 @@ function create_markdown_cell_html_view(language) { return function(cell_model) 
     var outer_ace_div = $('<div class="outer-ace-div"></div>');
 
     var ace_div = $('<div style="width:100%; height:100%;"></div>');
-    ace_div.css({ 'background-color': languages[language]["background-color"] });
+    var bg_color = language === 'Markdown' ? "#F7EEE4" : "#E8F1FA";
+    ace_div.css({ 'background-color': bg_color });
 
     inner_div.append(outer_ace_div);
     outer_ace_div.append(ace_div);
     ace.require("ace/ext/language_tools");
     var widget = ace.edit(ace_div[0]);
-    var RMode = require(languages[language].ace_mode).Mode;
+    var RMode = require(RCloud.language.ace_mode(language)).Mode;
     var session = widget.getSession();
     widget.setValue(cell_model.content());
     ui_utils.ace_set_pos(widget, 0, 0); // setValue selects all
@@ -204,7 +197,8 @@ function create_markdown_cell_html_view(language) { return function(cell_model) 
         id_updated: update_div_id,
         language_updated: function() {
             language = cell_model.language();
-            ace_div.css({ 'background-color': languages[language]["background-color"] });
+            var bg_color = language === 'Markdown' ? "#F7EEE4" : "#E8F1FA";
+            ace_div.css({ 'background-color': bg_color });
             select.val(cell_model.language());
         },
         result_updated: function(r) {
@@ -215,6 +209,7 @@ function create_markdown_cell_html_view(language) { return function(cell_model) 
             // There's a list of things that we need to do to the output:
             var uuid = rcloud.deferred_knitr_uuid;
 
+            // FIXME None of these things should be hard-coded.
             if (cell_model.language() === 'R' && inner_div.find("pre code").length === 0) {
                 r_result_div.prepend("<pre><code class='r'>" + cell_model.content() + "</code></pre>");
             }

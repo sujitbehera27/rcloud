@@ -109,7 +109,8 @@ RCloud.create = function(rcloud_ocaps) {
             ["api", "disable_warnings"],
             ["api", "set_url"],
             ["api", "get_url"],
-            ["get_notebook_by_name"]
+            ["get_notebook_by_name"],
+            ["languages", "get_list"]
         ];
         process_paths(paths);
 
@@ -275,6 +276,14 @@ RCloud.create = function(rcloud_ocaps) {
         };
         rcloud.api.get_url = function() {
             return rcloud_ocaps.api.get_urlAsync();
+        };
+
+        //////////////////////////////////////////////////////////////////////
+        // languages
+
+        rcloud.languages = {};
+        rcloud.languages.get_list = function() {
+            return rcloud_ocaps.languages.get_listAsync();
         };
     }
 
