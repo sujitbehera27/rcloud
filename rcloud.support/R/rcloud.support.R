@@ -232,7 +232,7 @@ rcloud.search <-function(query) {
 
   ## FIXME: shouldn't we URL-encode the query?!?
   q <- gsub("%20","+",query)
-  solr.url <- paste0(url,"/select?q=",q,"&start=0&rows=1000&wt=json&indent=true&fl=description,id,user,updated_at,starcount&hl=true&hl.fl=content,comments&hl.fragsize=0&hl.maxAnalyzedChars=-1")
+  solr.url <- paste0(url,"/select?q=",q,"&start=0&rows=1000&wt=json&indent=true&fl=description,id,user,updated_at,starcount&hl=true&hl.preserveMulti=true&hl.fl=content,comments&hl.fragsize=0&hl.maxAnalyzedChars=-1")
   solr.res <- getURL(solr.url, .encoding = 'utf-8', .mapUnicode=FALSE)
   solr.res <- fromJSON(solr.res)
   response.docs <- solr.res$response$docs
@@ -243,21 +243,64 @@ rcloud.search <-function(query) {
         if(length(response.high[[i]]) != 0){
 	  if(!is.null(response.high[[i]]$content)) {
             parts.content <- fromJSON(response.high[[i]]$content)
-	    for(j in 1:length(parts.content)){
+            for(j in 1:length(parts.content)) {
               strmatched <- grep("open_b_close",strsplit(parts.content[[j]]$content,'\n')[[1]],value=T,fixed=T)
-              if(length(which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1]) !=0)) {
-                if(which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1])%in%1 | (which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1])%in%length(strsplit(parts.content[[j]]$content,'\n')[[1]]))) {
-                  parts.content[[j]]$content <- strsplit(parts.content[[j]]$content,'\n')[[1]][which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1])]
-                } else
-                  parts.content[[j]]$content <- strsplit(parts.content[[j]]$content,'\n')[[1]][(which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1])-1):(which(strsplit(parts.content[[j]]$content,'\n')[[1]] == strmatched[1])+1)]
-              } else
-                parts.content[[j]]$content <- grep("open_b_close",strsplit(parts.content[[j]]$content,'\n')[[1]],value=T,ignore.case=T)
+                splitted <-strsplit(parts.content[[j]]$content,'\n')[[1]]
+                res <-list()
+                for(k in 1: length(splitted)) {
+                  is_match <- grep("open_b_close",splitted[[k]])
+                  is_match_next <- NULL
+                  if(k < length(splitted)){
+                    is_match_next <- grep("open_b_close",splitted[[k+1]])
             }
+                  if(as.logical(length(is_match)) && !as.logical(length(is_match_next))) {
+                    if(as.logical(k==1)){
+                      res[k] <- paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+
+#                      if(as.logical(splitted[k+1] == "" )) {
+#                        res[k] <- paste0(k,'line_no',splitted[k],sep='|-|')
+#                       } else {
+#                          res[k] <- paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+#                       }
+
+                    } else if(as.logical(k==length(splitted))){
+                      if(as.logical(splitted[k-1] != "") ) {
+                          res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],sep='|-|')
 	  } else {
+                          res[k] <- paste0(k,'line_no',splitted[k],sep='|-|')
+                      }
+                    } else {
+                      if(splitted[k-1] != "" && splitted[k+1] != "" ) {
+                        res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+                      } else if(splitted[k-1] == "" && splitted[k+1] != "" ) {
+                        res[k] <- paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+                      } else {
+                        res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],sep='|-|')
+                      }
+                    }
+                  }
+                  if(k == length(splitted)) {
+                     res[sapply(res, is.null)] <- NULL
+                     parts.content[[j]]$content <- paste0(toString(res))
+                  }
+                }
+             }
+          } else {
             response.high[[i]]$content <- "[{\"filename\":\"part1.R\",\"content\":[]}]"
 	    parts.content <- fromJSON(response.high[[i]]$content)
           }
-          if(!is.null(response.high[[i]]$comments)) parts.content[[length(parts.content)+1]] <- list(filename="comments", content=response.high[[i]]$comments)
+      if(!is.null(response.high[[i]]$comments)) {
+       final_res <-list()
+       comments <- response.high[[i]]$comments
+       for(n in 1: length(comments)) {
+         cmt_match <- grep("open_b_close",comments[n])
+         if(as.logical(length(cmt_match))) {
+           final_res[[length(final_res)+1]] <- comments[n]
+         }
+       }
+       response.high[[i]]$comments <- final_res
+       parts.content[[length(parts.content)+1]] <- list(filename="comments", content=response.high[[i]]$comments)
+      }
           response.high[[i]]$content <- toJSON(parts.content)
                                         #Handling HTML content
           response.high[[i]]$content <- gsub("<","&lt;",response.high[[i]]$content)
