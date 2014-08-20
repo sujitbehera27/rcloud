@@ -860,6 +860,39 @@ a.accordion-toggle.right [class^="icon-"], a.accordion-toggle.right [class*="ico
 
     background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
 }
+.search-type-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 60px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+.search-sortby-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 120px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+.search-orderby-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 50px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
 
 .form-control.big {
     height: 20px;

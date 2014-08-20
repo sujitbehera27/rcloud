@@ -108,7 +108,22 @@
                 <div class="panel-body">
                   <div id="search-wrapper" class="widget-vsize"> <!-- only for sizing -->
                     <div id="search-header">
-                      <form id="search-form" action="#">Full-text search for <input type="text" value="" id="input-text-search"></input><button type='submit'>search</button>
+                      <form id="search-form" action="#">
+                          <select id="search-type" class="search-type-control">
+                              <option value="partial" selected>Partial</option>
+                              <option value="full">Full</option>
+                          </select>
+                          Text search for <input type="text" value="" id="input-text-search"></input><button type='submit'>search</button>
+                          <select id="sort-by" class="search-sortby-control">
+                              <option value="starcount" selected>No Of Stars</option>
+                              <option value="user">User</option>
+                              <option value="starcount">Notebook Name</option>
+                              <option value="updated_at">Updated dt</option>
+                          </select>
+                          <select id="order-by" class="search-orderby-control">
+                              <option value="asc" selected>Asc</option>
+                              <option value="desc">Desc</option>
+                          </select>
                       </form>
                       <div id="search-summary"></div>
                     </div>
