@@ -63,7 +63,7 @@ RCloud.UI.search = {
                                 added_parts++;
                             }
                             if(inner_table !== "") {
-                                inner_table = inner_table.replace(/\|-\|/g,'<br>');
+                                inner_table = inner_table.replace(/\|-\|,/g, '<br>').replace(/\|-\|/g, '<br>');
                                 inner_table = inner_table.replace(/line_no/g,'|');
                                 inner_table = "<table>" + inner_table + "</table>";
                                 parts_table += "<tr><td>" + inner_table + "</td></tr>";
