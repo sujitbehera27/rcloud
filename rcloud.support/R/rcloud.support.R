@@ -255,37 +255,26 @@ rcloud.search <-function(query,sortby,orderby,type) {
 
                     if(as.logical(length(is_match)) && !as.logical(length(is_match_next))) {
                      if(as.logical(k==1)){
-                       res[k] <- paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
-                       res[sapply(res, is.null)] <- NULL
-                       parts.content[[j]]$content <- paste0(toString(res))
-                       if(type == "partial") {
-                         break;
-                       }
+                       res[k] <- stitch.search.result(splitted,'optB',k)
                      } else if(as.logical(k==length(splitted))) {
                         if(as.logical(splitted[k-1] != "") ) {
-                          res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],sep='|-|')
+                         res[k] <- stitch.search.result(splitted,'optC',k)
 	                    } else {
-                          res[k] <- paste0(k,'line_no',splitted[k],sep='|-|')
-                        }
-                        res[sapply(res, is.null)] <- NULL
-                        parts.content[[j]]$content <- paste0(toString(res))
-                        if(type == "partial") {
-                          break;
+                         res[k] <- stitch.search.result(splitted,'default',k)
                         }
                     } else {
                         if(splitted[k-1] != "" && splitted[k+1] != "" ) {
-                          res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+                         res[k] <- stitch.search.result(splitted,'optA',k)
                         } else if(splitted[k-1] == "" && splitted[k+1] != "" ) {
-                          res[k] <- paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|')
+                         res[k] <- stitch.search.result(splitted,'optB',k)
                         } else {
-                          res[k] <- paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],sep='|-|')
+                         res[k] <- stitch.search.result(splitted,'optC',k)
                         }
-                        res[sapply(res, is.null)] <- NULL
-                        parts.content[[j]]$content <- paste0(toString(res))
-
-                        if(type == "partial") {
-                          break;
-                        }
+                    }
+                    res[sapply(res, is.null)] <- NULL
+                    parts.content[[j]]$content <- paste0(toString(res))
+                    if(type == "partial") {
+                      break;
                     }
                   }
               }
@@ -332,6 +321,14 @@ rcloud.search <-function(query,sortby,orderby,type) {
     return(solr.res$response$docs)
   } else
   return(c("error",solr.res$error$msg))
+}
+
+stitch.search.result <- function(splitted, type,k) {
+  switch(type,
+         optA = paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|'),
+         optB = paste0(k,'line_no',splitted[k],'|-|',k+1,'line_no',splitted[k+1],sep='|-|'),
+         optC = paste0(k-1,'line_no',splitted[k-1],'|-|',k,'line_no',splitted[k],sep='|-|'),
+         default = paste0(k,'line_no',splitted[k],sep='|-|'))
 }
 
 rcloud.create.notebook <- function(content) {
