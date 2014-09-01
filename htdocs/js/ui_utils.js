@@ -295,11 +295,11 @@ ui_utils.editable = function(elem$, command) {
         return s.replace(/\xa0/g,' '); // replace nbsp's with spaces
     }
     function set_content_type(is_multiline,content) {
-        if(is_multiline)
+        if(is_multiline) {
             elem$.html(content);
-        else
+        } else {
             elem$.text(content);
-
+        }
     }
     var old_opts = options(),
         new_opts = old_opts;
