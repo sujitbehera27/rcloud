@@ -403,8 +403,9 @@ ui_utils.editable = function(elem$, command) {
                 } else {
                     return false; // don't let CR through!
                 }
-            } else if(e.keyCode === 27)
+            } else if(e.keyCode === 27) {
                 elem$.blur(); // and cancel
+            }
             return true;
         });
         break;
