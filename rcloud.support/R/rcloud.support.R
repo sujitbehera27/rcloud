@@ -18,6 +18,7 @@ rcloud.unauthenticated.load.notebook <- function(id, version = NULL) {
 
 rcloud.load.notebook <- function(id, version = NULL) {
   res <- rcloud.get.notebook(id, version)
+  ulog("RCloud rcloud.load.notebook(",id,",",version,", user=", .session$username,"): ", if(res$ok) "OK" else "FAILED")
   if (res$ok) {
     .session$current.notebook <- res
     rcloud.reset.session()
@@ -46,7 +47,7 @@ rcloud.get.notebook <- function(id, version = NULL) {
     res <- rcs.get(stash.key(stash, id, version))
     if (is.null(res$ok)) res <- list(ok=FALSE)
     res
-  } else suppressWarnings(get.gist(id, version, ctx = .session$rgithub.context))
+  } else suppressWarnings(get.gist(id, version, ctx = .session$gist.context))
   ## FIXME: suppressWarnings is a hack to get rid of the stupid "Duplicated curl options"
   ##        which seem to be a httr bug
   if (rcloud.debug.level() > 1L) {
@@ -77,8 +78,13 @@ rcloud.unauthenticated.call.notebook <- function(id, version = NULL, args = NULL
 }
 
 rcloud.call.notebook <- function(id, version = NULL, args = NULL, attach = FALSE) {
+  ulog("RCloud rcloud.call.notebook(", id, ",", version, ")")
+  
   res <- rcloud.get.notebook(id, version)
   if (res$ok) {
+    if (is.null(.session$current.notebook)) ## no top level? set us as the session notebook so that get.asset et al work
+      .session$current.notebook <- res
+      
     args <- as.list(args)
     ## this is a hack for now - we should have a more general infrastructure for this ...
     ## get all files
@@ -169,6 +175,7 @@ rcloud.upload.to.notebook <- function(file, name) {
   if (is.null(.session$current.notebook))
     stop("Notebook must be loaded")
   id <- .session$current.notebook$content$id
+  ulog("RCloud rcloud.upload.to.notebook(id=", id, ", name=", name, ")")
   files <- list()
   files[[name]] <- list(content=rawToChar(file))
   content <- list(files = files)
@@ -178,7 +185,7 @@ rcloud.upload.to.notebook <- function(file, name) {
 }
 
 rcloud.update.notebook <- function(id, content) {
-  res <- modify.gist(id, content, ctx = .session$rgithub.context)
+  res <- modify.gist(id, content, ctx = .session$gist.context)
   .session$current.notebook <- res
   if (nzConf("solr.url")) {
     star.count <- rcloud.notebook.star.count(id)
@@ -226,7 +233,77 @@ update.solr <- function(notebook, starcount){
   }
 }
 
-nse.high[[i]]$content)
+rcloud.search <-function(query,sortby,orderby) {
+  url <- getConf("solr.url")
+  if (is.null(url)) stop("solr is not enabled")
+
+  ## FIXME: shouldn't we URL-encode the query?!?
+  q <- gsub("%20","+",query)
+  #solr.url <- paste0(url,"/select?q=",q,"&start=0&rows=1000&wt=json&indent=true&fl=description,id,user,updated_at,starcount&hl=true&hl.fl=content,comments&hl.fragsize=0&hl.maxAnalyzedChars=-1")
+  solr.url <- paste0(url,"/select?q=",q,"&start=0&rows=1000&wt=json&indent=true&fl=description,id,user,updated_at,starcount&hl=true&hl.preserveMulti=true&hl.fl=content,comments&hl.fragsize=0&hl.maxAnalyzedChars=-1&sort=",sortby,"+",orderby)
+  solr.res <- getURL(solr.url, .encoding = 'utf-8', .mapUnicode=FALSE)
+  solr.res <- fromJSON(solr.res)
+  response.docs <- solr.res$response$docs
+  response.high <- solr.res$highlighting
+  if(is.null(solr.res$error)){
+    if(length(response.docs) > 0){
+      for(i in 1:length(response.high)){
+        if(length(response.high[[i]]) != 0){
+	  if(!is.null(response.high[[i]]$content)) {
+            parts.content <- fromJSON(response.high[[i]]$content)
+            for(j in 1:length(parts.content)) {
+               splitted <-strsplit(parts.content[[j]]$content,'\n')[[1]]
+               res <-list()
+               for(k in 1: length(splitted)) {
+                 is_match <- grep("open_b_close",splitted[[k]])
+                  is_match_next <- NULL
+                  if(k < length(splitted)){
+                    is_match_next <- grep("open_b_close",splitted[[k+1]])
+                  }
+                  if(as.logical(length(is_match)) && !as.logical(length(is_match_next))) {
+                 if(as.logical(k==1)){
+                   res[k] <- stitch.search.result(splitted,'optB',k)
+                 } else if(as.logical(k==length(splitted))) {
+                    if(as.logical(splitted[k-1] != "") ) {
+                     res[k] <- stitch.search.result(splitted,'optC',k)
+                    } else {
+                     res[k] <- stitch.search.result(splitted,'default',k)
+                    }
+	             } else {
+                    if(splitted[k-1] != "" && splitted[k+1] != "" ) {
+                     res[k] <- stitch.search.result(splitted,'optA',k)
+                    } else if(splitted[k-1] == "" && splitted[k+1] != "" ) {
+                     res[k] <- stitch.search.result(splitted,'optB',k)
+                    } else {
+                     res[k] <- stitch.search.result(splitted,'optC',k)
+                    }
+                  }
+                 }
+                 if(k == length(splitted)) {
+                   res[sapply(res, is.null)] <- NULL
+                   parts.content[[j]]$content <- paste0(toString(res))
+                 }
+               }
+            }
+         } else {
+            response.high[[i]]$content <- "[{\"filename\":\"part1.R\",\"content\":[]}]"
+	    parts.content <- fromJSON(response.high[[i]]$content)
+          }
+      if(!is.null(response.high[[i]]$comments)) {
+       final_res <-list()
+       comments <- response.high[[i]]$comments
+       for(n in 1: length(comments)) {
+         cmt_match <- grep("open_b_close",comments[n])
+         if(as.logical(length(cmt_match))) {
+           final_res[[length(final_res)+1]] <- comments[n]
+         }
+       }
+       response.high[[i]]$comments <- final_res
+       parts.content[[length(parts.content)+1]] <- list(filename="comments", content=response.high[[i]]$comments)
+      }
+          response.high[[i]]$content <- toJSON(parts.content)
+                                        #Handling HTML content
+          response.high[[i]]$content <- gsub("<","&lt;",response.high[[i]]$content)
           response.high[[i]]$content <- gsub(">","&gt;",response.high[[i]]$content)
           response.high[[i]]$content <- gsub("open_b_close","<b style=\\\\\"background:yellow\\\\\">",response.high[[i]]$content)
           response.high[[i]]$content <- gsub("open_/b_close","</b>",response.high[[i]]$content)
@@ -260,21 +337,22 @@ stitch.search.result <- function(splitted, type,k) {
 }
 
 rcloud.create.notebook <- function(content) {
-  res <- create.gist(content, ctx = .session$rgithub.context)
+  res <- create.gist(content, ctx = .session$gist.context)
   if (res$ok) {
     .session$current.notebook <- res
     rcloud.reset.session()
   }
   res
-
 }
 
-rcloud.rename.notebook <- function(id, new.name)
+rcloud.rename.notebook <- function(id, new.name) {
+  ulog("RCloud rcloud.rename.notebook(", id, ", ", toJSON(new.name), ")")
   modify.gist(id,
               list(description=new.name),
-              ctx = .session$rgithub.context)
+              ctx = .session$gist.context)
+}
 
-rcloud.fork.notebook <- function(id) fork.gist(id, ctx = .session$rgithub.context)
+rcloud.fork.notebook <- function(id) fork.gist(id, ctx = .session$gist.context)
 
 rcloud.get.users <- function() ## NOTE: this is a bit of a hack, because it abuses the fact that users are first in usr.key...
   ## also note that we are looking deep in the config space - this shold be really much easier ...
@@ -283,7 +361,7 @@ rcloud.get.users <- function() ## NOTE: this is a bit of a hack, because it abus
 # sloooow, but we don't have any other way of verifying the owner
 notebook.is.mine <- function(id) {
   nb <- rcloud.get.notebook(id)
-  nb$content$user$login == .session$rgithub.context$user$login
+  nb$content$user$login == .session$username
 }
 
 rcloud.publish.notebook <- function(id) {
