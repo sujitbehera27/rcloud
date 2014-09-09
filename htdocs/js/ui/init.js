@@ -107,14 +107,6 @@ RCloud.UI.init = function() {
     var non_notebook_panel_height = 246;
     $('.notebook-tree').css('height', (window.innerHeight - non_notebook_panel_height)+'px');
 
-//    $("#search-form").submit(function(e) {
-//        e.preventDefault();
-//        e.stopPropagation();
-//        var qry = $('#input-text-search').val();
-//        $('#input-text-search').focus();
-//        RCloud.UI.search.exec(qry);
-//        return false;
-//    });
     $("#search-form").submit(function(e) {
         searchproc();
         return false;
@@ -125,17 +117,13 @@ RCloud.UI.init = function() {
     $("#order-by").change(function() {
         searchproc();
     });
-    $("#search-type").change(function() {
-        searchproc();
-    });
     var searchproc=function(){
         var qry = $('#input-text-search').val();
         var sortby= $("#sort-by option:selected").val();
         var orderby= $("#order-by option:selected" ).val();
-        var type= $("#search-type option:selected" ).val();
         $('#input-text-search').blur();
         if(!($('#input-text-search').val() === ""))
-            RCloud.UI.search.exec(qry,sortby,orderby,type);
+            RCloud.UI.search.exec(qry,sortby,orderby);
 
     }
     $('#help-form').submit(function(e) {
