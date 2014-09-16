@@ -4,7 +4,7 @@
     <link rel="stylesheet" type="text/css" href="/css/custom-theme/jquery-ui-1.8.18.custom.css" />
     <link rel="stylesheet" type="text/css" href="/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="/css/jqtree.css"/>
-    <link rel="stylesheet" type="text/css" href="/css/bootstrapori.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/bootstrap.css"/>
     <link rel="stylesheet" type="text/css" href="/css/rmarkdown.css"/>
     <link rel="stylesheet" type="text/css" href="/css/bootstrap-rcloud-tweaks.css"/>
     <link rel="stylesheet" type="text/css" href="/css/main.css"/>
@@ -110,10 +110,20 @@
                                 <div id="search-header">
                                     <form id="search-form" action="#">
                                         <div class="btn-group-sm">
-                                            <input type="text" id="input-text-search" placeholder="..Search Keyword"></input>
-                                            <button class="btn btn-default" type="submit">
+                                            <input type="text" id="input-text-search" placeholder="..Search Keyword" style="height: 20px;"></input>
+                                            <button class="btn btn-primary" type="submit" style="max-height: 22px;">
                                                 <i class="icon-search"></i>
                                             </button>
+                                            <select id="sort-by" class="selectpicker" style="height: 20px;">
+                                                <option value="starcount" selected>No Of Stars</option>
+                                                <option value="user">User</option>
+                                                <option value="starcount">Notebook Name</option>
+                                                <option value="updated_at">Updated Date</option>
+                                            </select>
+                                            <select id="order-by" class="selectpicker" style="height: 20px;">
+                                                <option value="asc" selected>Asc</option>
+                                                <option value="desc">Desc</option>
+                                            </select>
                                         </div>
                                     </form>
                                     <div id="search-summary"></div>
@@ -138,8 +148,8 @@
                             <div id="help-header">
                                 <form id="help-form" action="#">
                                     <div class="btn-group-sm" style="padding-left: 8px;">
-                                        <input type="text" id="input-text-help" placeholder="..Help me find"></input>
-                                        <button class="btn btn-default" type="submit">
+                                        <input type="text" id="input-text-help" placeholder="..Help me find" style="height: 20px;"></input>
+                                        <button class="btn btn-primary" type="submit" style="max-height: 22px;">
                                             <i class="icon-question"></i>
                                         </button>
                                     </div>
@@ -252,7 +262,7 @@
                                 <div id="file-upload-wrapper">
                                     <div id="file-upload-controls" class="btn-group-sm">
                                         <input type="file" id="file" style="display: inline;" multiple></input>
-                                        <button id="upload-submit" class="btn btn-default" type="submit" style="clear: both;float: right;">
+                                        <button id="upload-submit" class="btn btn-primary" type="submit" style="clear: both;float: right;max-height: 22px;">
                                             <i class="icon-upload"></i>
                                         </button>
                                         <br/>
@@ -286,7 +296,7 @@
                                     <div id="comments-container"></div>
                                     <div id="comment-entry" class="btn-group-sm">
                                         <textarea id="comment-entry-body"></textarea>
-                                        <button id="comment-submit" class="btn btn-default" type="submit" >
+                                        <button id="comment-submit" class="btn btn-primary" type="submit" style="max-height: 22px;">
                                             <i class="icon-comment"></i>
                                         </button>
                                     </div>
@@ -343,7 +353,7 @@
   -->
 
 <script type="text/javascript"
-        src="/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        src="https://c328740.ssl.cf1.rackcdn.com/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
 <script type="text/javascript">MathJax && MathJax.Hub.Config({tex2jax: {processEscapes: true,
     processEnvironments: false, inlineMath: [ ['\\(','\\)'] ],
