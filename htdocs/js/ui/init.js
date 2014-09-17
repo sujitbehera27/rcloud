@@ -110,11 +110,26 @@ RCloud.UI.init = function() {
     $("#search-form").submit(function(e) {
         e.preventDefault();
         e.stopPropagation();
-        var qry = $('#input-text-search').val();
-        $('#input-text-search').focus();
-        RCloud.UI.search.exec(qry);
+        searchproc();
         return false;
     });
+
+    $("#sort-by").change(function() {
+        searchproc();
+    });
+
+    $("#order-by").change(function() {
+        searchproc();
+    });
+
+    var searchproc=function(){
+        var qry = $('#input-text-search').val();
+        var sortby= $("#sort-by option:selected").val();
+        var orderby= $("#order-by option:selected" ).val();
+        $('#input-text-search').focus();
+        RCloud.UI.search.exec(qry,sortby,orderby);
+    }
+
     $('#help-form').submit(function(e) {
         e.preventDefault();
         e.stopPropagation();
