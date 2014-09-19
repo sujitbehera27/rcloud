@@ -1,5 +1,5 @@
 RCloud.UI.search = {
-    exec: function(query) {
+    exec: function(query,sortby,orderby) {
         function summary(html) {
             $("#search-summary").show().html($("<h4 />").append(html));
         }
@@ -47,18 +47,24 @@ RCloud.UI.search = {
                         for(var k = 0; k < d[i].parts.length && added_parts < 5; k++) {
                             inner_table = "";
                             var ks = Object.keys(d[i].parts[k]);
-                            if(ks.length > 0 && d[i].parts[k].content !== "") {
+                            if(ks.length > 0 && d[i].parts[k].content !== "" && d[i].parts[k].filename != "scratch.R") {
                                 var content = d[i].parts[k].content;
                                 if(typeof content === "string")
                                     content = [content];
                                 if(content.length > 0)
                                     parts_table += "<tr><th class='search-result-part-name'>" + d[i].parts[k].filename + "</th></tr>";
-                                for(var l = 0; l < content.length; l++)
-                                    inner_table += "<tr><td class='search-result-line-number'>" + (l + 1) + "</td><td class='search-result-code'><code>" + content[l] + "</code></td></tr>";
+                                for(var l = 0; l < content.length; l++) {
+                                    if (d[i].parts[k].filename === "comments" && content[l].indexOf(":") > 0) {
+                                        content[l] = content[l].substring(content[l].indexOf(":") + 1, content[l].length);
+                                    }
+                                    inner_table += "<tr><td class='search-result-code'><code>" + content[l] + "</code></td></tr>";
+                                }
 
                                 added_parts++;
                             }
                             if(inner_table !== "") {
+                                inner_table = inner_table.replace(/\|-\|,/g, '<br>').replace(/\|-\|/g, '<br>');
+                                inner_table = inner_table.replace(/line_no/g,'|');
                                 inner_table = "<table>" + inner_table + "</table>";
                                 parts_table += "<tr><td>" + inner_table + "</td></tr>";
                             }
@@ -99,7 +105,7 @@ RCloud.UI.search = {
         $("#search-results").html("");
         query = encodeURIComponent(query);
         RCloud.UI.with_progress(function() {
-            return rcloud.search(query)
+            return rcloud.search(query,sortby,orderby)
                 .then(function(v) {
                     create_list_of_search_results(v);
                 });

@@ -861,6 +861,40 @@ a.accordion-toggle.right [class^="icon-"], a.accordion-toggle.right [class*="ico
     background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
 }
 
+.search-type-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 60px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+.search-sortby-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 120px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+.search-orderby-control {
+    -webkit-appearance: none;
+    height: 16px;
+    width: 50px;
+    padding: 1px 0 0 4px;
+    position: relative;
+    font-size: 12px;
+    border: inherit;
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+
 .form-control.big {
     height: 20px;
     font-size: 16px;
@@ -915,4 +949,40 @@ a.accordion-toggle.right [class^="icon-"], a.accordion-toggle.right [class*="ico
 pre > .vt100 {
     padding: 16px;
     display: block;
+}
+.btn-default-rcloud {
+    color: #333333;
+    background-color: #ffffff;
+    height: 20px;
+    width: 23px;
+}
+.btn-icon-rcloud {
+    color: #333333;
+    background-color: #ffffff;
+    height: 20px;
+    width: 25px;
+}
+.btn-execute-rcloud {
+    color: #333333;
+    background-color: #ffffff;
+    height: 16px;
+    width: 85px;
+}
+.form-control1 {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 90px;
+    font-size: 12px;
+
+
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16px' height='16px'><polyline fill='#555' points='8,13 10,9 6,9'/><polyline fill='#555' points='8,4 10,8 6,8'/></svg>") right no-repeat;
+}
+.btn-icon-rcloud:hover,
+.btn-icon-rcloud:focus,
+.btn-icon-rcloud:active,
+.btn-icon-rcloud.active,
+.open .dropdown-toggle.btn-icon-rcloud {
+    color: #333333;
+    background-color: #ebebeb;
+    border-color: #adadad;
 }

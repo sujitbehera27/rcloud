@@ -900,6 +900,7 @@ var editor = function () {
             .style({"max-width":"5%"})
             .on("click", function (d) {
                 if(d.user.login===username_)
+                console.log(d.id);
                     editor.delete_comment(d.id).then(function(v){console.log(v);});
             });
         $('#collapse-comments').trigger('size-changed');
