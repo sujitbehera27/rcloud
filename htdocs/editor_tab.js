@@ -726,7 +726,7 @@ var editor = function () {
     function scroll_into_view(node) {
         var height = $tree_.parent().css("height").replace("px","");
         var p = node.parent;
-        while(p.sort_order===ordering.NOTEBOOK) {
+        while(p.sort_order & p.sort_order===ordering.NOTEBOOK) {
             $tree_.tree('openNode', p);
             p = p.parent;
         }
